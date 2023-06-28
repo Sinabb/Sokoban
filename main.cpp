@@ -49,11 +49,13 @@ int main()
 		std::cin >> input;
 
 		Update(stage, input, gStageWidth, gStageHeight);
-		std::cout << "½Â¸®" << std::endl;
-		delete[] stage;
-		stage = nullptr;
+
 
 	}
+
+	std::cout << "½Â¸®" << std::endl;
+	delete[] stage;
+	stage = nullptr;
 	
 }
 
@@ -145,7 +147,7 @@ void Update(Object* stage,char input, int w, int h)
 
 	int i{};
 
-	for (int i = 0; i < w*h; i++)
+	for (i = 0; i < w*h; i++)
 	{
 		if (stage[i] == OBJ_PLAYER || stage[i] == OBJ_PLAYER_ON_GOAL)
 		{
@@ -164,16 +166,42 @@ void Update(Object* stage,char input, int w, int h)
 		std::cerr << "invalid player position" << std::endl;
 		return;
 	}
+	
+	int p = y * w + x;
+	int tp = ty * w + tx;
+
+	if (stage[tp]==OBJ_SPACE||stage[tp]==OBJ_GOAL)
+	{
+		stage[tp] = (stage[tp] == OBJ_GOAL) ? OBJ_PLAYER_ON_GOAL : OBJ_PLAYER;
+		stage[p] = (stage[p] == OBJ_PLAYER_ON_GOAL) ? OBJ_GOAL : OBJ_SPACE;
+	}
+	else if (stage[tp] == OBJ_BLOCK || stage[tp] == OBJ_BLOCK_ON_GOAL)
+	{
+		int tx2 = tx + dx;
+		int ty2 = ty + dy;
+		if (tx2 <0||ty2<0||tx2>=w || ty2>=h)
+		{
+			std::cerr << "invalid block position" << std::endl;
+			return;
+		}
+		int tp2 = ty2 * w + tx2;
+		if (stage[tp2]==OBJ_SPACE||stage[tp2]==OBJ_GOAL)
+		{
+			stage[tp2] = (stage[tp2] == OBJ_GOAL) ? OBJ_BLOCK_ON_GOAL : OBJ_BLOCK;
+			stage[tp] = (stage[tp] == OBJ_BLOCK_ON_GOAL) ? OBJ_PLAYER_ON_GOAL : OBJ_PLAYER;
+			stage[p] = (stage[p] == OBJ_PLAYER_ON_GOAL) ? OBJ_GOAL : OBJ_SPACE;
+		}
+	}
 }
 
 bool IsClear(const Object* stage, int w, int h)
 {
 	for (int i = 0; i < w*h; i++)
 	{
-		if (stage[i] == OBJ_SPACE)
+		if (stage[i] == OBJ_BLOCK)
 		{
 			return false;
 		}
 	}
-	return false;
+	return true;
 }
